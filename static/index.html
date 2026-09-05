@@ -1,7 +1,64 @@
 <!DOCTYPE html>
-<html><body style="font-family: Arial;text-align:cenre">
-  <h2> SENTINEX - Voice Clone Detector</h2>
-  <input type="file" id="audio">
-  <button onclick="alert('FAKE Detected 94% - Kashmiri accent mismatch!')">Check Audio</button>
-  <p>SIH 2026 - Problem ID 26104</p>
-</body>body><html>
+<html>
+<head>
+    <title>SENTINEX - Voice Clone Detector</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7fb;
+    text-align: center;
+    padding: 60px;
+  }
+  .box {
+    background : white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px #cccccc;
+    padding: 35px;
+    max-width: 500px;
+    margin: auto;
+  }
+  h1 {
+    color: #172b4d;
+  }
+  p {
+    color: #555555;
+  }
+  button {
+    background-color: #172b4d;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 10px;
+  }
+  #result {
+    margin-top: 25px;
+    font-weight: bold;
+  }
+  </style>
+</head>
+<body>
+    <div class="box">
+        <h1>SENTINEX</h1>
+        <h3>Voice Clone Detector</h3>
+        <p>Upload an audio file to check if whether it may be AI-generated.</p>
+        <input type="file" id="audio" accept="audio/*">
+        <br>
+        <button onclick="startRecording()">
+          Record Voice</button>
+        <button onclick="checkAudio()">Check Audio</button>
+        <p id="result"></p>
+        <small>SIH 2026 Problem ID 26104</small>
+    </div>
+    <script>
+        function startRecording() {
+            alert("Recording feature will be connected to the AI detector soon.");
+        }
+
+        function checkAudio() {
+            document.getElementById("result").innerText = "Demo Result: Fake detected 94% - Kashmiri accent mismatch.";
+        }
+    </script>
+</body>
+</html>
