@@ -1,7 +1,116 @@
 <!DOCTYPE html>
-<html><body style="font-family: Arial;text-align:cenre">
-  <h2> SENTINEX - Voice Clone Detector</h2>
-  <input type="file" id="audio">
-  <button onclick="alert('FAKE Detected 94% - Kashmiri accent mismatch!')">Check Audio</button>
-  <p>SIH 2026 - Problem ID 26104</p>
-</body>body><html>
+<html>
+<head>
+    <title>SENTINEX - Voice Clone Detector</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7fb;
+    text-align: center;
+    padding: 60px;
+  }
+  .box {
+    background : white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px #cccccc;
+    padding: 35px;
+    max-width: 500px;
+    margin: auto;
+  }
+  h1 {
+    color: #172b4d;
+  }
+  p {
+    color: #555555;
+  }
+  button {
+    background-color: #172b4d;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 10px;
+  }
+  #result {
+    margin-top: 25px;
+    font-weight: bold;
+  }
+  </style>
+</head>
+<body>
+    <div class="box">
+        <h1>SENTINEX</h1>
+        <h3>Voice Clone Detector</h3>
+        <p>Upload an audio file to check if whether it may be AI-generated.</p>
+        <input type="file" id="audio" accept="audio/*">
+        <br>
+        <button onclick="toggleRecording()">
+          Record Voice</button>
+        <button onclick="checkAudio()">Check Audio</button>
+        <p id="result"></p>
+        <small>SIH 2026 Problem ID 26104</small>
+    </div>
+    <script>
+     
+          let recorder = null;
+          let audioChunks = [];
+         
+          async function toggleRecording() {
+            if (recorder && recorder.state === "recording") {
+            recorder.stop();
+            return;
+            }
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+             
+              recorder = new MediaRecorder(stream);
+              audiochunks = [];
+              recorder.ondataavailable = function(event) {
+                if (event.data.size > 0) {
+                  audioChunks.push(event.data);
+                }
+              };
+              recorder.onstop = function() {
+                stream.getTracks().forEach(function(track) {
+                  track.stop();
+                });
+                if (audioChunks.length === 0) {
+                  document.getElementById("result").innerText = "No audio recorded. Please try again.";
+                  return;
+                }
+                const audioBlob = new Blob(audioChunks, { type: recorder.mimeType });
+                const audioUrl = URL.createObjectURL(audioBlob);
+
+                const audioPlayer = document.createElement("audio");
+                audioPlayer.controls = true;
+                audioPlayer.preload = "auto";
+                audioPlayer.src = audioUrl;
+                document.getElementById("result").innerHTML = "Recording completed!<br>";
+                document.getElementById("result").appendChild(audioPlayer);
+            };
+            recorder.start(1000);
+            document.getElementById("result").innerText = "Recording... Click Record Voice again to stop.";
+            } catch (error) {
+              document.getElementById("result").innerText = "Microphone error: " + error.message;
+            }
+          
+          }
+        
+        function checkAudio() {
+            document.getElementById("result").innerText = "Analyyzing audio... Please wait.";
+            setTimeout(function() {
+                document.getElementById("result").innerHTML =  `
+                <div class="result-card">
+                  <h3>Analysis Complete</h3>
+                  <p><strong>Potentially AI-Generated</strong></p>
+                  <p>Confidence Score:<strong>94%</strong></p>
+                  <p>Voice Pattern: Unusual variation detected</p>
+                  <small>This is a prototype result.</small>
+                </div>
+                `;
+        }, 1500);
+      }
+    </script>
+</body>
+</html>
