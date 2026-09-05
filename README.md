@@ -10,9 +10,13 @@ LIVE Audio -> Preprocessing -> MFCC/Mel-Spec -> CNN/CRNN/Transformer -> Risk Sco
 ### Tech Stack 
 Python , Librosa , PyTorch , FastAPI , ASVsproof 2019 Dataset
 ### Current Status
-- Preprocessing : IN PROGRESS
-- Feature Extraction : PROPOSED
-- Model Training : PROPOSED
+- Frontend prototype completed
+- Audio upload and voice recording interface completed
+- Audio preprocessing : In progress
+- Feature extraction : Planned
+- Model training : Planned
+- Backend API integration : Planned
+- Mobile application : Future scope
 ### Roadmap
 MVP -> Mobile App -> Telecom Integration -> Banking API -> Edge AI 
 Team SENTINEX - Detect the Deception . Protect the Identity .
