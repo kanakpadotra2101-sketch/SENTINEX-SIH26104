@@ -1,116 +1,1179 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>SENTINEX - Voice Clone Detector</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f7fb;
-    text-align: center;
-    padding: 60px;
-  }
-  .box {
-    background : white;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px #cccccc;
-    padding: 35px;
-    max-width: 500px;
-    margin: auto;
-  }
-  h1 {
-    color: #172b4d;
-  }
-  p {
-    color: #555555;
-  }
-  button {
-    background-color: #172b4d;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 10px;
-  }
-  #result {
-    margin-top: 25px;
-    font-weight: bold;
-  }
-  </style>
-</head>
-<body>
-    <div class="box">
-        <h1>SENTINEX</h1>
-        <h3>Voice Clone Detector</h3>
-        <p>Upload an audio file to check if whether it may be AI-generated.</p>
-        <input type="file" id="audio" accept="audio/*">
-        <br>
-        <button onclick="toggleRecording()">
-          Record Voice</button>
-        <button onclick="checkAudio()">Check Audio</button>
-        <p id="result"></p>
-        <small>SIH 2026 Problem ID 26104</small>
-    </div>
-    <script>
-     
-          let recorder = null;
-          let audioChunks = [];
-         
-          async function toggleRecording() {
-            if (recorder && recorder.state === "recording") {
-            recorder.stop();
-            return;
-            }
-            try {
-              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-             
-              recorder = new MediaRecorder(stream);
-              audiochunks = [];
-              recorder.ondataavailable = function(event) {
-                if (event.data.size > 0) {
-                  audioChunks.push(event.data);
-                }
-              };
-              recorder.onstop = function() {
-                stream.getTracks().forEach(function(track) {
-                  track.stop();
-                });
-                if (audioChunks.length === 0) {
-                  document.getElementById("result").innerText = "No audio recorded. Please try again.";
-                  return;
-                }
-                const audioBlob = new Blob(audioChunks, { type: recorder.mimeType });
-                const audioUrl = URL.createObjectURL(audioBlob);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-                const audioPlayer = document.createElement("audio");
-                audioPlayer.controls = true;
-                audioPlayer.preload = "auto";
-                audioPlayer.src = audioUrl;
-                document.getElementById("result").innerHTML = "Recording completed!<br>";
-                document.getElementById("result").appendChild(audioPlayer);
-            };
-            recorder.start(1000);
-            document.getElementById("result").innerText = "Recording... Click Record Voice again to stop.";
-            } catch (error) {
-              document.getElementById("result").innerText = "Microphone error: " + error.message;
+    <title>SENTINEX - Voice Shield AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f9ff;
+            color: #172033;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+
+        nav {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid #e4ebf5;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 7%;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1264e8;
+            letter-spacing: 1px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            font-size: 14px;
+            color: #4d6178;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #19b56b;
+        }
+
+        /* MAIN */
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 65px 20px 35px;
+        }
+
+        .badge {
+            display: inline-block;
+
+            background: #e9f2ff;
+            color: #1264e8;
+
+            padding: 8px 14px;
+            border-radius: 30px;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 46px;
+            margin-bottom: 15px;
+            color: #132238;
+        }
+
+        .hero h1 span {
+            color: #1264e8;
+        }
+
+        .hero p {
+            max-width: 650px;
+            margin: auto;
+
+            color: #65758b;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+        /* ANALYSIS CARD */
+
+        .analysis-card {
+            background: white;
+
+            border: 1px solid #e2eaf4;
+            border-radius: 22px;
+
+            padding: 30px;
+
+            box-shadow: 0 15px 45px rgba(31, 75, 120, 0.08);
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+
+        .input-card {
+            border: 1px solid #dce6f2;
+            border-radius: 18px;
+            padding: 25px;
+
+            background: #fbfdff;
+        }
+
+        .input-card h3 {
+            font-size: 19px;
+            margin-bottom: 8px;
+        }
+
+        .input-card p {
+            color: #728198;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* UPLOAD */
+
+        .upload-label {
+            display: block;
+
+            border: 2px dashed #b8cce5;
+            border-radius: 14px;
+
+            padding: 25px;
+            text-align: center;
+
+            cursor: pointer;
+
+            color: #1264e8;
+            font-weight: 700;
+
+            transition: 0.2s;
+        }
+
+        .upload-label:hover {
+            background: #edf5ff;
+            border-color: #1264e8;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* BUTTONS */
+
+        button {
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .record-btn {
+            width: 100%;
+
+            padding: 14px;
+
+            border-radius: 12px;
+
+            background: #edf5ff;
+            color: #1264e8;
+
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .record-btn.recording {
+            background: #ffe9e9;
+            color: #d63c3c;
+        }
+
+        .analyze-area {
+            text-align: center;
+            margin-top: 28px;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            max-width: 500px;
+
+            padding: 16px 25px;
+
+            border-radius: 13px;
+
+            background: #1264e8;
+            color: white;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            box-shadow: 0 8px 20px rgba(18, 100, 232, 0.22);
+
+            transition: 0.2s;
+        }
+
+        .analyze-btn:hover {
+            background: #0954ca;
+        }
+
+        .analyze-btn:disabled {
+            background: #9bb9df;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* AUDIO */
+
+        .file-name {
+            margin-top: 12px;
+            color: #596b82;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 18px;
+            display: none;
+        }
+
+        /* RESULT */
+
+        #result {
+            margin-top: 28px;
+        }
+
+        .result-card {
+            background: white;
+
+            border: 1px solid #dfe8f3;
+            border-radius: 18px;
+
+            padding: 28px;
+
+            box-shadow: 0 12px 35px rgba(31, 75, 120, 0.07);
+        }
+
+        .result-heading {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 15px;
+        }
+
+        .result-label {
+            font-size: 30px;
+            font-weight: 800;
+
+            margin-bottom: 15px;
+        }
+
+        .result-label.fake {
+            color: #d83b3b;
+        }
+
+        .result-label.real {
+            color: #15945c;
+        }
+
+        .result-label.unknown {
+            color: #d18b00;
+        }
+
+        .confidence-text {
+            color: #53657b;
+            margin-bottom: 10px;
+        }
+
+        .confidence-text strong {
+            color: #18263a;
+        }
+
+        .meter {
+            height: 12px;
+
+            background: #e9eef5;
+
+            border-radius: 20px;
+
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+
+            background: #1264e8;
+
+            border-radius: 20px;
+
+            transition: width 0.5s ease;
+        }
+
+        .result-note {
+            margin-top: 18px;
+
+            padding: 14px;
+
+            background: #f5f8fc;
+
+            border-radius: 10px;
+
+            color: #65758b;
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* WORKFLOW */
+
+        .workflow {
+            padding: 55px 0;
+        }
+
+        .workflow h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .step {
+            background: white;
+            border: 1px solid #e2eaf4;
+            border-radius: 15px;
+
+            padding: 20px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #e9f2ff;
+            color: #1264e8;
+
+            border-radius: 50%;
+
+            font-weight: 700;
+
+            margin-bottom: 12px;
+        }
+
+        .step h3 {
+            font-size: 15px;
+            margin-bottom: 7px;
+        }
+
+        .step p {
+            color: #718096;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+
+            padding: 25px;
+
+            color: #8290a3;
+            font-size: 13px;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 750px) {
+
+            .hero h1 {
+                font-size: 34px;
             }
-          
-          }
-        
-        function checkAudio() {
-            document.getElementById("result").innerText = "Analyyzing audio... Please wait.";
-            setTimeout(function() {
-                document.getElementById("result").innerHTML =  `
-                <div class="result-card">
-                  <h3>Analysis Complete</h3>
-                  <p><strong>Potentially AI-Generated</strong></p>
-                  <p>Confidence Score:<strong>94%</strong></p>
-                  <p>Voice Pattern: Unusual variation detected</p>
-                  <small>This is a prototype result.</small>
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            nav {
+                padding: 0 5%;
+            }
+        }
+
+        @media (max-width: 500px) {
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-card {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <nav>
+
+        <div class="logo">
+            SENTINEX
+        </div>
+
+        <div class="status">
+            <span class="status-dot"></span>
+            System Ready
+        </div>
+
+    </nav>
+
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="badge">
+            SIH 2026 • Problem ID 26104
+        </div>
+
+        <h1>
+            Voice <span>Shield AI</span>
+        </h1>
+
+        <p>
+            Analyze an audio sample using an AI-based
+            audio anti-spoofing model to identify
+            potential synthetic or manipulated speech.
+        </p>
+
+    </section>
+
+
+    <!-- MAIN -->
+
+    <main class="container">
+
+        <section class="analysis-card">
+
+            <div class="input-grid">
+
+                <!-- UPLOAD -->
+
+                <div class="input-card">
+
+                    <h3>Upload Audio</h3>
+
+                    <p>
+                        Select an existing audio recording
+                        from your computer.
+                    </p>
+
+                    <label
+                        class="upload-label"
+                        for="fileInput"
+                    >
+                        📁 Choose Audio File
+                    </label>
+
+                    <input
+                        type="file"
+                        id="fileInput"
+                        accept="audio/*"
+                    >
+
+                    <div
+                        id="fileName"
+                        class="file-name"
+                    >
+                        No file selected
+                    </div>
+
                 </div>
+
+
+                <!-- RECORD -->
+
+                <div class="input-card">
+
+                    <h3>Record Voice</h3>
+
+                    <p>
+                        Record a short voice sample
+                        directly using your microphone.
+                    </p>
+
+                    <button
+                        id="recordBtn"
+                        class="record-btn"
+                    >
+                        🎙 Start Recording
+                    </button>
+
+                    <div
+                        id="recordStatus"
+                        class="file-name"
+                    >
+                        Ready to record
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- AUDIO PLAYER -->
+
+            <audio
+                id="audioPlayer"
+                controls
+            ></audio>
+
+
+            <!-- ANALYZE -->
+
+            <div class="analyze-area">
+
+                <button
+                    id="checkBtn"
+                    class="analyze-btn"
+                >
+                    🔍 Analyze Voice
+                </button>
+
+            </div>
+
+
+            <!-- RESULT -->
+
+            <div id="result"></div>
+
+        </section>
+
+
+        <!-- WORKFLOW -->
+
+        <section class="workflow">
+
+            <h2>
+                How SENTINEX Works
+            </h2>
+
+            <div class="steps">
+
+                <div class="step">
+
+                    <div class="step-number">
+                        1
+                    </div>
+
+                    <h3>
+                        Voice Input
+                    </h3>
+
+                    <p>
+                        Upload or record an audio sample.
+                    </p>
+
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-number">
+                        2
+                    </div>
+
+                    <h3>
+                        Preprocessing
+                    </h3>
+
+                    <p>
+                        Audio is converted and prepared
+                        for model analysis.
+                    </p>
+
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-number">
+                        3
+                    </div>
+
+                    <h3>
+                        AI Analysis
+                    </h3>
+
+                    <p>
+                        The anti-spoofing model evaluates
+                        the audio sample.
+                    </p>
+
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-number">
+                        4
+                    </div>
+
+                    <h3>
+                        Result
+                    </h3>
+
+                    <p>
+                        SENTINEX displays the model's
+                        prediction and confidence.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+        SENTINEX • Voice Shield AI • Smart India Hackathon
+    </footer>
+
+
+    <script>
+
+        /* =========================
+           VARIABLES
+        ========================= */
+
+        const fileInput =
+            document.getElementById("fileInput");
+
+        const fileName =
+            document.getElementById("fileName");
+
+        const recordBtn =
+            document.getElementById("recordBtn");
+
+        const recordStatus =
+            document.getElementById("recordStatus");
+
+        const audioPlayer =
+            document.getElementById("audioPlayer");
+
+        const checkBtn =
+            document.getElementById("checkBtn");
+
+        const result =
+            document.getElementById("result");
+
+
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordedAudioBlob = null;
+        let audioStream = null;
+
+
+        /* =========================
+           FILE UPLOAD
+        ========================= */
+
+        fileInput.addEventListener(
+            "change",
+            function () {
+
+                if (!this.files.length) {
+                    return;
+                }
+
+                const file = this.files[0];
+
+                /*
+                    If the user chooses a file,
+                    remove the previous recording.
+                */
+
+                recordedAudioBlob = null;
+
+                fileName.innerText =
+                    file.name;
+
+                audioPlayer.src =
+                    URL.createObjectURL(file);
+
+                audioPlayer.style.display =
+                    "block";
+
+                recordStatus.innerText =
+                    "Audio file selected";
+
+            }
+        );
+
+
+        /* =========================
+           RECORDING
+        ========================= */
+
+        recordBtn.addEventListener(
+            "click",
+            async function () {
+
+                /*
+                    START RECORDING
+                */
+
+                if (!mediaRecorder ||
+                    mediaRecorder.state === "inactive") {
+
+                    try {
+
+                        audioStream =
+                            await navigator.mediaDevices
+                                .getUserMedia({
+                                    audio: true
+                                });
+
+                        audioChunks = [];
+
+                        mediaRecorder =
+                            new MediaRecorder(
+                                audioStream
+                            );
+
+                        mediaRecorder.ondataavailable =
+                            function (event) {
+
+                                if (event.data.size > 0) {
+
+                                    audioChunks.push(
+                                        event.data
+                                    );
+
+                                }
+
+                            };
+
+
+                        mediaRecorder.onstop =
+                            function () {
+
+                                /*
+                                    Create WebM blob
+                                    for browser playback
+                                    and backend analysis.
+                                */
+
+                                recordedAudioBlob =
+                                    new Blob(
+                                        audioChunks,
+                                        {
+                                            type:
+                                                mediaRecorder.mimeType ||
+                                                "audio/webm"
+                                        }
+                                    );
+
+
+                                /*
+                                    Create playback URL.
+                                */
+
+                                const audioUrl =
+                                    URL.createObjectURL(
+                                        recordedAudioBlob
+                                    );
+
+                                audioPlayer.src =
+                                    audioUrl;
+
+                                audioPlayer.style.display =
+                                    "block";
+
+                                audioPlayer.load();
+
+
+                                fileInput.value = "";
+
+                                fileName.innerText =
+                                    "Recorded voice ready";
+
+                                recordStatus.innerText =
+                                    "Recording finished. Press ▶ to listen.";
+
+                            };
+
+
+                        mediaRecorder.start();
+
+
+                        recordBtn.innerText =
+                            "⏹ Stop Recording";
+
+                        recordBtn.classList.add(
+                            "recording"
+                        );
+
+                        recordStatus.innerText =
+                            "Recording... Speak clearly.";
+
+
+                    } catch (error) {
+
+                        console.error(error);
+
+                        recordStatus.innerText =
+                            "Microphone permission was denied.";
+
+                    }
+
+                    return;
+                }
+
+
+                /*
+                    STOP RECORDING
+                */
+
+                if (mediaRecorder.state === "recording") {
+
+                    mediaRecorder.stop();
+
+
+                    if (audioStream) {
+
+                        audioStream
+                            .getTracks()
+                            .forEach(
+                                track => track.stop()
+                            );
+
+                    }
+
+
+                    recordBtn.innerText =
+                        "🎙 Start Recording";
+
+                    recordBtn.classList.remove(
+                        "recording"
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =========================
+           ANALYZE AUDIO
+        ========================= */
+
+        checkBtn.addEventListener(
+            "click",
+            async function () {
+
+                let audioFile = null;
+
+
+                /*
+                    If a recording exists,
+                    use the recording.
+                */
+
+                if (recordedAudioBlob) {
+
+                    audioFile =
+                        new File(
+                            [
+                                recordedAudioBlob
+                            ],
+                            "recorded_voice.webm",
+                            {
+                                type:
+                                    recordedAudioBlob.type ||
+                                    "audio/webm"
+                            }
+                        );
+
+                }
+
+                /*
+                    Otherwise use uploaded file.
+                */
+
+                else if (fileInput.files.length > 0) {
+
+                    audioFile =
+                        fileInput.files[0];
+
+                }
+
+
+                /*
+                    No audio.
+                */
+
+                if (!audioFile) {
+
+                    result.innerHTML = `
+
+                        <div class="result-card">
+
+                            <div class="result-heading">
+                                Analysis
+                            </div>
+
+                            <div class="result-label unknown">
+                                No Audio
+                            </div>
+
+                            <div class="result-note">
+                                Please record or upload
+                                an audio sample first.
+                            </div>
+
+                        </div>
+
+                    `;
+
+                    return;
+                }
+
+
+                /*
+                    Disable button while analysing.
+                */
+
+                checkBtn.disabled = true;
+
+                checkBtn.innerText =
+                    "⏳ Analyzing...";
+
+
+                result.innerHTML = `
+
+                    <div class="result-card">
+
+                        <div class="result-heading">
+                            SENTINEX
+                        </div>
+
+                        <div class="confidence-text">
+                            Processing audio with
+                            the anti-spoofing model...
+                        </div>
+
+                    </div>
+
                 `;
-        }, 1500);
-      }
+
+
+                try {
+
+                    const formData =
+                        new FormData();
+
+                    formData.append(
+                        "file",
+                        audioFile
+                    );
+
+
+                    const startTime =
+                        performance.now();
+
+
+                    const response =
+                        await fetch(
+                            "/predict",
+                            {
+                                method: "POST",
+                                body: formData
+                            }
+                        );
+
+
+                    const endTime =
+                        performance.now();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Server returned an error."
+                        );
+
+                    }
+
+
+                    const data =
+                        await response.json();
+
+
+                    const analysisTime =
+                        (
+                            (endTime - startTime)
+                            / 1000
+                        ).toFixed(2);
+
+
+                    const label =
+                        data.label ||
+                        "UNKNOWN";
+
+
+                    const confidence =
+                        Number(
+                            data.confidence || 0
+                        );
+
+
+                    const isFake =
+                        label
+                            .toUpperCase()
+                            .includes("FAKE") ||
+                        label
+                            .toUpperCase()
+                            .includes("SPOOF");
+
+
+                    const displayLabel =
+                        isFake
+                            ? "⚠ FAKE / SPOOF"
+                            : "✓ REAL / BONAFIDE";
+
+
+                    const cssClass =
+                        isFake
+                            ? "fake"
+                            : "real";
+
+
+                    result.innerHTML = `
+
+                        <div class="result-card">
+
+                            <div class="result-heading">
+                                Analysis Result
+                            </div>
+
+                            <div class="result-label ${cssClass}">
+                                ${displayLabel}
+                            </div>
+
+                            <div class="confidence-text">
+
+                                Model confidence:
+                                <strong>
+                                    ${confidence.toFixed(2)}%
+                                </strong>
+
+                            </div>
+
+                            <div class="meter">
+
+                                <div
+                                    class="meter-fill"
+                                    style="width:${Math.min(
+                                        confidence,
+                                        100
+                                    )}%"
+                                ></div>
+
+                            </div>
+
+                            <div class="result-note">
+
+                                Analysis completed in
+                                <strong>
+                                    ${analysisTime} seconds
+                                </strong>.
+
+                                <br><br>
+
+                                This result is the prediction
+                                of the current anti-spoofing
+                                model and should not be treated
+                                as a guaranteed determination.
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+
+                } catch (error) {
+
+                    console.error(error);
+
+
+                    result.innerHTML = `
+
+                        <div class="result-card">
+
+                            <div class="result-heading">
+                                Analysis Failed
+                            </div>
+
+                            <div class="result-label unknown">
+                                Unable to Analyze
+                            </div>
+
+                            <div class="result-note">
+
+                                ${error.message}
+
+                                <br><br>
+
+                                Make sure the SENTINEX
+                                backend server is running.
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+
+
+                /*
+                    Enable button again.
+                */
+
+                checkBtn.disabled = false;
+
+                checkBtn.innerText =
+                    "🔍 Analyze Voice";
+
+            }
+        );
+
     </script>
+
 </body>
 </html>
